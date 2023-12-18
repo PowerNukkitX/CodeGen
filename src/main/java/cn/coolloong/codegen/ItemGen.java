@@ -4,7 +4,9 @@ import cn.coolloong.codegen.util.DownloadUtil;
 import cn.coolloong.codegen.util.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import lombok.SneakyThrows;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtType;
@@ -71,9 +73,9 @@ public class ItemGen {
 
     @SneakyThrows
     public static void generateRuntimeIdJson() {
-        List<RuntimeIDEntry> result = new ArrayList<>();
+        List<ItemEntry> result = new ArrayList<>();
         for (var entry : ITEM_DATA) {
-            result.add(new RuntimeIDEntry(entry.getString("name"), entry.getShort("id"), entry.getBoolean("isComponentBased")));
+            result.add(new ItemEntry(entry.getString("name"), entry.getShort("id")));
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(result);
@@ -82,6 +84,6 @@ public class ItemGen {
         Files.writeString(path, json, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
     }
 
-    record RuntimeIDEntry(String name, int id, boolean isComponentBased) {
+    record ItemEntry(String name, int id) {
     }
 }
