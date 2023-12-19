@@ -1,6 +1,7 @@
 package cn.coolloong.codegen;
 
 import cn.coolloong.codegen.util.DownloadUtil;
+import cn.coolloong.codegen.util.Identifier;
 import cn.coolloong.codegen.util.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,6 +51,9 @@ public class ItemGen {
         }
         generateItemID();
         generateRuntimeIdJson();
+        generateItemInitCodeBlock();
+        generateItemClass();
+        System.out.println("OK!");
     }
 
     @SneakyThrows
@@ -82,6 +86,62 @@ public class ItemGen {
         Path path = Path.of("target/runtime_item_states.json");
         Files.deleteIfExists(path);
         Files.writeString(path, json, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+    }
+
+    @SneakyThrows
+    public static void generateItemInitCodeBlock() {
+        List<String> result = new ArrayList<>();
+        for (var k : ITEM_ID.keySet()) {
+            String template = "register(%s, Item%s.class);";
+            Identifier identifier = new Identifier(k);
+            result.add(template.formatted(identifier.path().toUpperCase(), convertToCamelCase(identifier.path())));
+        }
+        Path path = Path.of("target/item_init_block.txt");
+        Files.deleteIfExists(path);
+        Files.writeString(path, String.join("\n", result), StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+    }
+
+    @SneakyThrows
+    public static void generateItemClass() {
+        File file = new File("target/itemclasses/");
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        String template = """
+                public class %s extends Item {
+                     public %s() {
+                         super(%s);
+                     }
+                }""";
+        for (var k : ITEM_ID.keySet()) {
+            Identifier identifier = new Identifier(k);
+            String classNameFile = "Item%s.java".formatted(convertToCamelCase(identifier.path()));
+            Path path = Path.of("target/itemclasses").resolve(classNameFile);
+            Files.deleteIfExists(path);
+            String className = classNameFile.replace(".java", "");
+            String result = template.formatted(className, className, identifier.path().toUpperCase());
+            Files.writeString(path, result, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        }
+    }
+
+    public static String convertToCamelCase(String input) {
+        StringBuilder result = new StringBuilder();
+        boolean makeUpperCase = true;
+
+        for (char character : input.toCharArray()) {
+            if (character == '_') {
+                makeUpperCase = true;
+            } else {
+                if (makeUpperCase) {
+                    result.append(Character.toUpperCase(character));
+                    makeUpperCase = false;
+                } else {
+                    result.append(character);
+                }
+            }
+        }
+
+        return result.toString();
     }
 
     record ItemEntry(String name, int id) {
