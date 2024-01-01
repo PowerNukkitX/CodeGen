@@ -3,8 +3,6 @@ package cn.coolloong.codegen;
 import cn.coolloong.codegen.util.DownloadUtil;
 import cn.coolloong.codegen.util.Identifier;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
@@ -20,7 +18,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Allay Project 2023/3/26
@@ -59,7 +60,7 @@ public class BlockIDGen {
         }
 
         generateBlockID();
-        generateBlockInitCodeBlock();
+        generateBlockRegisterCodeBlock();
         generateBlockClass();
         System.out.println("OK!");
     }
@@ -89,7 +90,7 @@ public class BlockIDGen {
     }
 
     @SneakyThrows
-    public static void generateBlockInitCodeBlock() {
+    public static void generateBlockRegisterCodeBlock() {
         List<String> result = new ArrayList<>();
         for (var k : BLOCKID.keySet()) {
             String template = "register(%s, Block%s.class);";

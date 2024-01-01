@@ -51,7 +51,7 @@ public class ItemGen {
         }
         generateItemID();
         generateRuntimeIdJson();
-        generateItemInitCodeBlock();
+        generateItemRegisterBlock();
         generateItemClass();
         System.out.println("OK!");
     }
@@ -89,7 +89,7 @@ public class ItemGen {
     }
 
     @SneakyThrows
-    public static void generateItemInitCodeBlock() {
+    public static void generateItemRegisterBlock() {
         List<String> result = new ArrayList<>();
         for (var k : ITEM_ID.keySet()) {
             String template = "register(%s, Item%s.class);";
